@@ -1,0 +1,14 @@
+[
+  {"goal": "The web container keeps restarting, why?", "roles": ["ops"]},
+  {"goal": "Is the db container healthy?", "roles": ["ops"]},
+  {"goal": "Show me the last errors in the logs of the web container", "roles": ["ops"]},
+  {"goal": "Should we switch the heating to Winter this week?", "roles": ["home"]},
+  {"goal": "Will tonight be cold enough to need heating?", "roles": ["home"]},
+  {"goal": "What is the hot water tank temperature and is solar enough today?", "roles": ["home"]},
+  {"goal": "What changed in the latest release of the web project, anything breaking?", "roles": ["research"]},
+  {"goal": "The web container crashed after the update. Check it and read what changed in the release notes.", "roles": ["ops", "research"]},
+  {"goal": "Why is the living room cold and is the heat pump running?", "roles": ["home"]},
+  {"goal": "Restart the database container", "roles": ["ops"]},
+  {"goal": "Anything wrong with the services right now?", "roles": ["ops"]},
+  {"goal": "Tell me a joke", "roles": ["research"]}
+]

@@ -1,0 +1,18 @@
+# User service. Install with:
+#   cp systemd/hlagents.service ~/.config/systemd/user/ && systemctl --user daemon-reload
+# It is not started automatically. Start it with: systemctl --user start hlagents
+# Stop it at any time without touching anything else on the system.
+[Unit]
+Description=hlagents multi agent workflow
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/hlagents
+EnvironmentFile=%h/.config/hlagents.env
+ExecStart=%h/hlagents/.venv/bin/hlagents --config %h/hlagents/config.yaml run
+Restart=on-failure
+Nice=10
+MemoryMax=768M
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,30 @@
+# Copy to config.yaml. Secrets (HA_TOKEN, MEMORY_TOKEN, INTAKE_TOKEN) come from the environment.
+ollama_url: http://localhost:11434
+model: qwen3.8:27b       # any Ollama model that supports tool calling; see docs/evaluation.md
+db_path: hlagents.db              # separate from any other agent's state
+
+# Nothing changes a system unless this is false AND a human approved the request.
+dry_run: true
+
+# Allowlists. A tool or action outside these is refused in code, whatever the model says.
+containers: [web, db]
+github_repos: [owner/project]     # for release notes
+ha_prefixes: ["sensor.", "weather.", "climate.", "water_heater.", "binary_sensor."]
+heat_pump_entity: climate.heat_pump
+water_heater_entity: water_heater.heat_pump
+weather_entity: weather.home
+
+# Limits per task
+max_depth: 3
+turn_limit: 10
+time_budget_s: 240
+tool_clip_chars: 4000
+max_calls_per_tool: 6
+approval_ttl_s: 21600
+
+# Optional
+# memory_url: http://localhost:8098   # leave a note in the shared household memory when a request finishes
+# ntfy_url: https://ntfy.example.com  # push approval requests to a phone
+# ntfy_topic: agents
+# serve_host: 127.0.0.1               # alert intake, enabled when INTAKE_TOKEN is set
+# serve_port: 8110
