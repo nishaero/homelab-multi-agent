@@ -11,7 +11,7 @@ import httpx
 
 from . import actions
 from .guard import clip, redact, wrap_untrusted
-from .notify import notify
+from .notify import notify_approval
 
 
 class ToolError(Exception):
@@ -176,7 +176,7 @@ def request_action(ctx, action: str, args: dict, reason: str) -> dict:
         return {"status": "pending_approval", "approval_id": existing["id"], "note": "already requested"}
     aid = ctx.store.create_approval(ctx.task["id"], action, args, reason[:500])
     ctx.pending.append(aid)
-    notify(ctx.cfg, "Approval needed", f"#{aid} {action} {json.dumps(args)}\nReason: {reason[:300]}\nApprove with: hlagents approve {aid}")
+    notify_approval(ctx.cfg, aid, action, args, reason, ctx.store.get_approval(aid)["token"])
     return {"status": "pending_approval", "approval_id": aid,
             "note": "A human must approve this. Do not assume it happened. Say that it is waiting for approval."}
 

@@ -36,12 +36,19 @@ class Config:
     ntfy_url: str = ""                                          # optional, for approval requests
     serve_host: str = "127.0.0.1"                               # alert intake, see `hlagents serve`
     serve_port: int = 8110
+    api_host: str = "127.0.0.1"                                 # remote API, enabled when API_TOKEN is set
+    api_port: int = 8111
+    mcp_host: str = "127.0.0.1"                                 # MCP server for an assistant, `hlagents mcp`
+    mcp_port: int = 8112
+    ha_notify_services: list[str] = field(default_factory=list) # e.g. ["mobile_app_phone_1"]; approval buttons
     ntfy_topic: str = ""
 
     ha_url: str = ""
     ha_token: str = ""
     memory_token: str = ""
     intake_token: str = ""
+    api_token: str = ""
+    mcp_secret: str = ""
 
     @classmethod
     def load(cls, path: str | None = None) -> "Config":
@@ -50,11 +57,13 @@ class Config:
         if p.exists():
             data = yaml.safe_load(p.read_text()) or {}
         known = set(cls.__dataclass_fields__)
-        cfg = cls(**{k: v for k, v in data.items() if k in known and k not in ("ha_url", "ha_token", "memory_token", "intake_token")})
+        cfg = cls(**{k: v for k, v in data.items() if k in known and k not in ("ha_url", "ha_token", "memory_token", "intake_token", "api_token", "mcp_secret")})
         cfg.ha_url = os.environ.get("HA_URL", data.get("ha_url", "")).rstrip("/")
         cfg.ha_token = os.environ.get("HA_TOKEN", "")
         cfg.memory_token = os.environ.get("MEMORY_TOKEN", "")
         cfg.intake_token = os.environ.get("INTAKE_TOKEN", "")
+        cfg.api_token = os.environ.get("API_TOKEN", "")
+        cfg.mcp_secret = os.environ.get("MCP_SECRET", "")
         cfg.ollama_url = os.environ.get("OLLAMA_URL", cfg.ollama_url).rstrip("/")
         cfg.model = os.environ.get("HLAGENTS_MODEL", cfg.model)
         return cfg

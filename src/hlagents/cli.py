@@ -7,9 +7,11 @@ import logging
 import sys
 import time
 
-from . import actions
+from . import approvals
 from .config import Config
 from .gate import BACKGROUND, INTERACTIVE
+from .api import serve_api
+from .ha_bridge import start_bridge
 from .intake import serve
 from .runner import Hub
 from .store import TERMINAL, Store
@@ -35,6 +37,10 @@ def cmd_run(args, cfg, store):
     hub.start()
     if cfg.intake_token:
         serve(hub)
+    if cfg.api_token:
+        serve_api(hub)
+    if start_bridge(hub):
+        print("phone approval buttons enabled")
     print(f"workers running (dry_run={cfg.dry_run}, model={cfg.model}). Ctrl+C to stop.")
     try:
         while True:
@@ -65,24 +71,17 @@ def cmd_pending(args, cfg, store):
 
 
 def cmd_approve(args, cfg, store):
-    a = store.get_approval(args.id)
-    if a["status"] != "pending":
-        sys.exit(f"approval #{a['id']} is already {a['status']}")
-    if time.time() - a["created"] > cfg.approval_ttl_s:
-        store.decide(a["id"], "expired", "system")
-        sys.exit("this request is too old and has expired. Ask again.")
     try:
-        result = actions.execute(a["action"], a["args"], cfg)
-        store.decide(a["id"], "executed", "human", result)
-    except Exception as e:  # noqa: BLE001
-        store.decide(a["id"], "failed", "human", f"{type(e).__name__}: {e}")
-        sys.exit(f"failed: {e}")
-    print(result)
+        print(approvals.approve(store, cfg, args.id))
+    except approvals.ApprovalError as e:
+        sys.exit(str(e))
 
 
 def cmd_deny(args, cfg, store):
-    store.decide(args.id, "denied", "human")
-    print(f"denied #{args.id}")
+    try:
+        print(approvals.deny(store, cfg, args.id))
+    except approvals.ApprovalError as e:
+        sys.exit(str(e))
 
 
 def cmd_audit(args, cfg, store):
@@ -98,6 +97,7 @@ def main(argv=None):
     s = sub.add_parser("submit"); s.add_argument("goal"); s.add_argument("--wait", action="store_true")
     s.add_argument("--background", action="store_true"); s.add_argument("--timeout", type=int, default=600); s.set_defaults(fn=cmd_submit)
     sub.add_parser("run").set_defaults(fn=cmd_run)
+    sub.add_parser("mcp").set_defaults(fn=lambda a, c, s: __import__("hlagents.mcp_server", fromlist=["main"]).main(c))
     s = sub.add_parser("status"); s.add_argument("id", type=int, nargs="?"); s.set_defaults(fn=cmd_status)
     sub.add_parser("pending").set_defaults(fn=cmd_pending)
     for name, fn in (("approve", cmd_approve), ("deny", cmd_deny)):
@@ -106,7 +106,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     cfg = Config.load(args.config)
-    args.fn(args, cfg, Store(cfg.db_path))
+    args.fn(args, cfg, None if args.cmd == "mcp" else Store(cfg.db_path))   # the MCP server only uses the API
 
 
 if __name__ == "__main__":

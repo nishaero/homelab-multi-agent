@@ -2,7 +2,7 @@
 
 Three kinds of checks. All numbers below are from the home lab this was built on.
 
-## 1. Tests with a scripted model (42)
+## 1. Tests with a scripted model (57)
 
 `pytest` runs in a few seconds. A scripted model plays back fixed replies, so the tests check
 the code around the model: permissions, approvals, loops, delegation, depth, fallbacks and
@@ -14,7 +14,11 @@ failures. Cases include:
 - instructions inside a log are flagged, and a restart still needs a human;
 - a summary that claims a change gets a correction;
 - a failed model call fails the task cleanly, and a dead model falls back to rule routing;
-- an alert webhook rejects a wrong token and ignores a repeated alert.
+- an alert webhook rejects a wrong token and ignores a repeated alert;
+- the API refuses every call without the token, never shows the approval token, and refuses a second decision;
+- a phone button with a forged token is ignored and logged, and the real token decides;
+- the MCP server has no way to approve;
+- two processes opening an old database at the same time do not collide.
 
 ## 2. Routing evaluation (12 requests)
 
@@ -71,3 +75,9 @@ so this shows the design works for that case, not that it is injection proof.
 - Behaviour on adversarial inputs beyond the one above.
 - Latency when the GPU is also busy with other work. The gate orders requests, but a
   measurement under load is still to be done.
+
+### Found by testing and running the remote access
+
+- Reading the request body twice in the API made a submit hang. A test caught it.
+- Two services opening the same database at once raced to add the same column. Starting both services
+  caught it, and the migration now tolerates it.

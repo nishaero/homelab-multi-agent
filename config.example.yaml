@@ -28,3 +28,10 @@ approval_ttl_s: 21600
 # ntfy_topic: agents
 # serve_host: 127.0.0.1               # alert intake, enabled when INTAKE_TOKEN is set
 # serve_port: 8110
+
+# Remote access, see docs/remote-access.md
+# api_host: 127.0.0.1                  # the HTTP API, enabled when API_TOKEN is set
+# api_port: 8111
+# mcp_host: 127.0.0.1                  # the MCP server, `hlagents mcp`; needs MCP_SECRET and API_TOKEN
+# mcp_port: 8112
+# ha_notify_services: [mobile_app_phone_1]   # approval requests with Approve and Deny buttons

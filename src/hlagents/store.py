@@ -6,6 +6,7 @@ hand off is recorded and any process (workers, the CLI) can see the same state.
 from __future__ import annotations
 
 import json
+import secrets
 import sqlite3
 import threading
 import time
@@ -29,6 +30,16 @@ create table if not exists audit(
 """
 
 
+def _migrate(db) -> None:
+    cols = {r[1] for r in db.execute("pragma table_info(approvals)")}
+    if "token" not in cols:
+        try:
+            db.execute("alter table approvals add column token text default ''")
+        except sqlite3.OperationalError as e:      # another process added it first
+            if "duplicate column" not in str(e):
+                raise
+
+
 class DepthExceeded(Exception):
     pass
 
@@ -40,6 +51,7 @@ class Store:
         self._lock = threading.RLock()
         with self._lock:
             self._db.executescript(SCHEMA)
+            _migrate(self._db)
 
     # ---- helpers
     def _one(self, sql: str, args: tuple = ()) -> dict | None:
@@ -121,8 +133,8 @@ class Store:
     # ---- approvals
     def create_approval(self, task_id: int, action: str, args: dict, reason: str) -> int:
         with self._lock:
-            cur = self._db.execute("insert into approvals(task_id,action,args,reason,created) values(?,?,?,?,?)",
-                                   (task_id, action, json.dumps(args, sort_keys=True), reason, time.time()))
+            cur = self._db.execute("insert into approvals(task_id,action,args,reason,token,created) values(?,?,?,?,?,?)",
+                                   (task_id, action, json.dumps(args, sort_keys=True), reason, secrets.token_urlsafe(9), time.time()))
         self.audit(task_id, "agent", "approval_requested", {"id": cur.lastrowid, "action": action, "args": args, "reason": reason})
         return cur.lastrowid
 
@@ -159,3 +171,8 @@ class Store:
 
     def audit_for_root(self, root_id: int) -> list[dict]:
         return self._all("select a.* from audit a left join tasks t on t.id=a.task_id where t.root_id=? order by a.id", (root_id,))
+
+
+def public_approval(a: dict) -> dict:
+    """An approval without its one time token. The token only ever goes to the phone notification."""
+    return {k: v for k, v in a.items() if k != "token"}

@@ -1,0 +1,15 @@
+# MCP server for an assistant. It talks to the hlagents API, so start hlagents.service first.
+[Unit]
+Description=hlagents MCP server
+After=hlagents.service
+
+[Service]
+WorkingDirectory=%h/hlagents
+EnvironmentFile=%h/.config/hlagents.env
+ExecStart=%h/hlagents/.venv/bin/hlagents --config %h/hlagents/config.yaml mcp
+Restart=on-failure
+Nice=10
+MemoryMax=256M
+
+[Install]
+WantedBy=default.target

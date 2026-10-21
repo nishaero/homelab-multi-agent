@@ -10,7 +10,7 @@ It runs beside existing automation and agents without replacing them. See
 
 ```mermaid
 flowchart LR
-    H["Human<br/>CLI or alert webhook"] --> C["Coordinator<br/>plans, no tools"]
+    H["Human<br/>CLI, phone buttons, API, MCP, alert webhook"] --> C["Coordinator<br/>plans, no tools"]
     C --> O["Ops agent<br/>containers, logs"]
     C --> E["Home and energy agent<br/>heating, hot water, forecast"]
     C --> R["Research agent<br/>release notes, logs (read only)"]
@@ -70,13 +70,19 @@ cp .env.example .env                 # Home Assistant URL and a read only token
 .venv/bin/hlagents audit 1           # every step of a request
 ```
 
-Set `INTAKE_TOKEN` and `hlagents run` also starts a small webhook on localhost that turns
-Alertmanager alerts into requests (one per distinct alert per hour).
+Optional, each switched on by its own setting:
+
+- `INTAKE_TOKEN`: a webhook that turns Alertmanager alerts into requests (one per distinct alert per hour).
+- `API_TOKEN`: an HTTP API for a UI or script.
+- `ha_notify_services`: approval requests arrive on your phone with Approve and Deny buttons.
+- `hlagents mcp`: an MCP server so an assistant can ask the team questions. It cannot approve anything.
+
+See [docs/remote-access.md](docs/remote-access.md).
 
 ## Tests and evaluation
 
 ```bash
-.venv/bin/pytest                       # 42 tests with a scripted model, a few seconds
+.venv/bin/pytest                       # 57 tests with a scripted model, a few seconds
 .venv/bin/python evals/run_evals.py --live   # routing quality of the real model
 ```
 

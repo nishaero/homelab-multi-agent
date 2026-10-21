@@ -37,3 +37,13 @@ def test_stale_working_tasks_fail_on_restart():
     s.claim_next("ops")
     assert s.fail_stale() == 1
     assert s.get_task(t)["status"] == "failed"
+
+
+def test_two_processes_can_open_an_old_database_at_once(tmp_path):
+    import sqlite3
+    from hlagents.store import Store
+    path = str(tmp_path / "old.db")
+    db = sqlite3.connect(path)
+    db.executescript("create table approvals(id integer primary key, task_id integer, action text, args text, reason text, status text default 'pending', decided_by text, result text, created real, decided real);")
+    db.commit(); db.close()
+    Store(path); Store(path)          # the second one finds the column already added
