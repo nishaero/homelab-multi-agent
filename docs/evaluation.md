@@ -2,7 +2,7 @@
 
 Three kinds of checks. All numbers below are from the home lab this was built on.
 
-## 1. Tests with a scripted model (57)
+## 1. Tests with a scripted model (65)
 
 `pytest` runs in a few seconds. A scripted model plays back fixed replies, so the tests check
 the code around the model: permissions, approvals, loops, delegation, depth, fallbacks and
@@ -18,7 +18,9 @@ failures. Cases include:
 - the API refuses every call without the token, never shows the approval token, and refuses a second decision;
 - a phone button with a forged token is ignored and logged, and the real token decides;
 - the MCP server has no way to approve;
-- two processes opening an old database at the same time do not collide.
+- two processes opening an old database at the same time do not collide;
+- skills load, a role gets only its own, broken skill files are skipped, every tool a skill names exists for its
+  role, and a skill cannot widen what an agent may do.
 
 ## 2. Routing evaluation (12 requests)
 
@@ -81,3 +83,11 @@ so this shows the design works for that case, not that it is injection proof.
 - Reading the request body twice in the API made a submit hang. A test caught it.
 - Two services opening the same database at once raced to add the same column. Starting both services
   caught it, and the migration now tolerates it.
+
+### Live check of the agent skills
+
+With the six skills loaded, three live requests on `qwen3.8:27b`: a container check (it reported a healthy
+service and two harmless log warnings, and did not ask for a restart), the heating question (it quoted the
+lowest night and the average and declined to switch, as the rule says), and a hot water change (it filed an
+approval, and noted that today's solar forecast was below the usual threshold). Three requests is a spot check,
+not a measurement of how much the skills help.

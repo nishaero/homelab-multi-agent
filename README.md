@@ -36,6 +36,9 @@ flowchart LR
   action is recorded but not carried out.
 - **One model call at a time.** A priority gate protects a single GPU, so voice and
   interactive requests are served before background work.
+- **Agents follow written skills.** Each role gets procedures from plain files in `skills/` (container triage, log
+  analysis, release notes review, the heating rule, hot water targets, how to ask for approval). They can be read
+  and reviewed like code. See [docs/skills.md](docs/skills.md).
 - **Everything is auditable.** Each task, tool call, refusal, flagged text and approval
   is a row you can read with `hlagents audit`.
 
@@ -53,6 +56,7 @@ Enforced in code, not in prompts. Details in [docs/guardrails.md](docs/guardrail
 | Claim check | An answer that says a change was made is corrected, because nothing can have been. |
 | Delegation limits | Allowed targets per role, depth limit of 3, no privilege gained by asking. |
 | Budgets | Turn limit, time budget and result size limit per task. |
+| Skills are text | Reusable procedures per role live in `skills/`. They cannot grant a tool or action. |
 | Secrets | Tokens and passwords are removed from logs before the model sees them. |
 
 ## Run it
@@ -82,7 +86,7 @@ See [docs/remote-access.md](docs/remote-access.md).
 ## Tests and evaluation
 
 ```bash
-.venv/bin/pytest                       # 57 tests with a scripted model, a few seconds
+.venv/bin/pytest                       # 65 tests with a scripted model, a few seconds
 .venv/bin/python evals/run_evals.py --live   # routing quality of the real model
 ```
 

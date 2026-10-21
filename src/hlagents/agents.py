@@ -5,6 +5,7 @@ import json
 import time
 from dataclasses import dataclass, field
 
+from . import skills as skills_mod
 from . import tools as T
 from .guard import LoopGuard, ToolDenied, check_tool, clip, fix_claims
 from .store import DONE, FAILED, NEEDS_HUMAN
@@ -74,7 +75,9 @@ def run_agent(hub, task: dict) -> tuple[str, str]:
     spec, cfg, store = SPECS[task["role"]], hub.cfg, hub.store
     started = time.monotonic()
     ctx, guard = Ctx(hub, task, started), LoopGuard(cfg.max_calls_per_tool)
-    briefing = _briefing(spec, cfg)
+    mine = skills_mod.for_role(getattr(hub, "skills", []), task["role"])
+    briefing = _briefing(spec, cfg) + skills_mod.prompt_block(mine)
+    store.audit(task["id"], task["role"], "skills_loaded", {"skills": [s.name for s in mine], "fingerprint": skills_mod.fingerprint(mine)})
     user = task["goal"] + (f"\n\nContext from earlier steps:\n{task['context']}" if task["context"] else "")
     messages = [{"role": "system", "content": spec.prompt + COMMON_RULES + briefing}, {"role": "user", "content": user}]
     schemas = [T.TOOLS[n].schema() for n in spec.tools]

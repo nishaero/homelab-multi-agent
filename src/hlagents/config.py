@@ -24,6 +24,7 @@ class Config:
     tool_clip_chars: int = 4000   # one tool result
     max_calls_per_tool: int = 6   # per task, any arguments
     approval_ttl_s: int = 6 * 3600
+    skills_dir: str = "skills"    # one folder per skill with a SKILL.md, see docs/skills.md
 
     containers: list[str] = field(default_factory=list)        # allowlist for logs and restarts
     ha_prefixes: list[str] = field(default_factory=lambda: ["sensor.", "weather.", "climate.", "water_heater.", "binary_sensor."])

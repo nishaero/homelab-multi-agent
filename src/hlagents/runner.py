@@ -7,7 +7,7 @@ import time
 
 import httpx
 
-from . import coordinator
+from . import coordinator, skills as skills_mod
 from .agents import ROLES, run_agent
 from .config import Config
 from .gate import INTERACTIVE, ModelGate
@@ -24,6 +24,7 @@ class Hub:
         self.gate = gate or ModelGate()
         self.llm = llm or OllamaLLM(cfg, self.gate)
         self._stop = threading.Event()
+        self.skills = skills_mod.load(cfg.skills_dir, valid_roles=set(ROLES))
         self._threads: list[threading.Thread] = []
 
     def submit(self, goal: str, priority: int = INTERACTIVE, requester: str = "human") -> int:
