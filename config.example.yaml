@@ -1,6 +1,7 @@
 # Copy to config.yaml. Secrets (HA_TOKEN, MEMORY_TOKEN, INTAKE_TOKEN) come from the environment.
 ollama_url: http://localhost:11434
 model: qwen3.8:27b       # any Ollama model that supports tool calling; see docs/evaluation.md
+num_ctx: 16384
 db_path: hlagents.db              # separate from any other agent's state
 
 # Nothing changes a system unless this is false AND a human approved the request.
@@ -21,6 +22,14 @@ time_budget_s: 240
 tool_clip_chars: 4000
 max_calls_per_tool: 6
 approval_ttl_s: 21600
+skills_dir: skills               # one folder per skill with a SKILL.md, see docs/skills.md
+
+# Entities the home agent is told about (entity id: what it is). It cannot guess these.
+known_entities:
+  sensor.hallway_temperature: hallway temperature in C
+  sensor.outdoor_temperature: outdoor temperature in C
+  climate.heat_pump: heat pump (preset_mode is Summer or Winter)
+  water_heater.heat_pump: hot water tank (target and current temperature)
 
 # Optional
 # memory_url: http://localhost:8098   # leave a note in the shared household memory when a request finishes

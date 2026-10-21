@@ -60,6 +60,23 @@ delegated answer is labelled as advice that does not widen what the receiver may
 `turn_limit`, `time_budget_s`, `tool_clip_chars` and one model call at a time through the
 gate.
 
+## 8. Skills
+
+Skills are reusable procedures for each role, kept as plain files in `skills/`. They are text: they cannot grant a
+tool or an action. A test checks that every tool and action a skill names exists for the roles that get it, and that a
+skill telling the research agent to restart something is still refused. Agents cannot write skills. Each task records
+which skills it loaded and a fingerprint of their text. See [skills.md](skills.md).
+
+## 9. Remote access
+
+- The API refuses every call without the bearer token, and every call if no token is configured. It never shows the
+  one time approval token.
+- A phone button carries a one time token that exists only in that notification and in the database. A press with a
+  missing or wrong token is ignored and logged.
+- The MCP server has no approve tool, so a voice assistant or a spoken message cannot approve a change.
+- All three ways to decide an approval end in the same code, so expiry, validation and the single decision apply
+  everywhere. See [remote-access.md](remote-access.md).
+
 ## What is not covered
 
 - A wrong recommendation. The model can misread data. A human reads every answer and

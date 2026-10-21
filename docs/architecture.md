@@ -11,9 +11,19 @@
 | `guard.py` | Permissions, loop detection, untrusted text handling, secret removal, claim check. |
 | `gate.py` | One model call at a time, by priority. |
 | `store.py` | SQLite tables for tasks, approvals and the audit trail. |
-| `runner.py` | One worker thread per role, all sharing the gate. |
+| `runner.py` | One worker thread per role, all sharing the gate. Loads the skills at start up. |
+| `skills.py` | Loads reusable procedures from `skills/*/SKILL.md` and gives each role its own. See [skills.md](skills.md). |
+| `approvals.py` | Decides an approval (expiry, validation, one decision). Used by the CLI, the API and the phone buttons. |
+| `llm.py` | The model client (Ollama) behind a small interface, so tests can script the model. |
+| `config.py` | Settings from a YAML file, secrets from the environment. |
+| `notify.py` | Approval requests to the phone (with buttons) or ntfy, and the outcome afterwards. |
 | `intake.py` | Optional alert webhook that creates requests. |
-| `cli.py` | Submit, run, approve, deny, audit. |
+| `api.py` | Optional token protected HTTP API: submit, status, audit, approve, deny. |
+| `ha_bridge.py` | Receives phone button presses from Home Assistant and decides the approval. |
+| `mcp_server.py` | Optional MCP server so an assistant can ask the team. It has no approve tool. |
+| `cli.py` | Submit, run, approve, deny, audit, and start the MCP server. |
+
+Remote access is described in [remote-access.md](remote-access.md).
 
 ## How a request flows
 

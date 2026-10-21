@@ -18,6 +18,7 @@ flowchart LR
     E -- "delegate" --> R
     O & E -- "request_action" --> A["Approval queue"]
     A -- "hlagents approve" --> X["Action executor<br/>validated, dry run by default"]
+    K["Skills<br/>plain files per role"] -.-> O & E & R
     C & O & E & R --> S[("Task table<br/>and audit trail")]
     C & O & E & R -- "one call at a time" --> G["Model gate"] --> L["Ollama"]
 ```
